@@ -72,7 +72,7 @@ export function onboarding(ctx) {
     document.body.classList.remove('onboard');
     try { window.history.replaceState(null, '', location.pathname + '#home'); } catch {}
     S.hasPin = true;
-    C.refreshPush(); C.startApp();
+    S.uid = S.store.uid; C.refreshPush(); C.startApp();
     toast(r && r.claimed ? 'おかえり。前の記録をこの端末に引き継いだ' : 'チームに参加しました');
   };
   $('#joinF').onsubmit = e => { e.preventDefault(); go(e.target, f => S.store.joinTeam(String(f.get('code')), String(f.get('nick')), String(f.get('pin')))); };
