@@ -1,7 +1,7 @@
 // sw.js — Service Worker（独立アプリ版のみ）。
 // 1) プッシュ通知の受信と表示 2) オフラインでも画面が開くようにアプリ本体をキャッシュ。
 // キャッシュは「ネット優先」：更新を公開すると次に開いたとき最新版になる。
-const CACHE = 'liftboard-v3';
+const CACHE = 'liftboard-v4';
 const SHELL = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/calc.js', 'js/catalog.js', 'js/body.js', 'js/store.js',
   'js/store-supabase.js', 'js/config.js', 'js/coach.js', 'js/programs.js', 'js/demo.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 
@@ -15,7 +15,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return; // DB通信は素通し
-  e.respondWith(fetch(e.request).then(res => {
+  e.respondWith(fetch(new Request(e.request.url, { cache: 'no-cache', credentials: 'same-origin' })).then(res => {
     const copy = res.clone();
     caches.open(CACHE).then(c => c.put(e.request, copy));
     return res;
