@@ -70,7 +70,7 @@ export function onboarding(ctx) {
     try { r = await fn(new FormData(f)); }
     catch (e) { toast(e.message || String(e), true); btn.disabled = false; return; }
     document.body.classList.remove('onboard');
-    try { window.history.replaceState(null, '', location.pathname + '#home'); } catch {}
+    try { window.history.replaceState(null, '', location.pathname + '#log'); } catch {}
     S.hasPin = true;
     S.uid = S.store.uid; C.refreshPush(); C.startApp();
     toast(r && r.claimed ? 'おかえり。前の記録をこの端末に引き継いだ' : 'チームに参加しました');
