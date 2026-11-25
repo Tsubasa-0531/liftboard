@@ -3,7 +3,7 @@ import { APP_VERSION, CHANGELOG, MUSCLES, MUSCLE_MAP, EXERCISES, CATEGORIES, POS
 import { summarize, buildStats, muscleWindow, lastTrained, weekKeys, periodTotal, rank, liveState,
   e1rm, setLoad, monthKey, dayKey, weekStart, weekKey, toCSV, sessionRows, CSV_HEADER, newId, validSets } from './calc.js';
 import { bodySVG } from './body.js';
-import { createStore } from './store.js';
+import { createStore } from './store.js'; import * as pinUI from './pin.js';
 import { PROGRAMS, PROGRAM_MAP } from './programs.js';
 import { suggest, history, programDay, advance, insights, recommendDay, strengthLevel, streakWeeks,
   earnedBadges, BADGES, STANDARDS, LEVEL_NAMES } from './coach.js';
@@ -201,7 +201,7 @@ function viewHome(v) {
              <button class="btn ghost sm" data-act="manual" ${S.store.canWrite ? '' : 'disabled'} style="margin-top:10px">過去の記録を手入力</button></div>`}
       </section>
       ${S.store.mode === 'supabase' && S.push && S.push !== 'on' && S.push !== 'unsupported' && S.push !== 'denied' ? pushCard(true) : ''}
-      ${coachCard()}
+      ${pinUI.card(S, false)}${coachCard()}
       <section class="card">
         <div class="card-h"><h2>今週のあなた</h2><span class="small mute">先週比</span></div>
         <div class="kpis">
@@ -894,7 +894,7 @@ function appCards() {
       <p class="small mute" style="margin:6px 0">このリンクを送ると、開くだけでコードが入った状態で参加できます。</p>
       <div class="row"><button class="btn blue sm" data-act="share">招待リンクを送る</button><button class="btn sm" data-act="copyinvite">リンクをコピー</button></div></section>
     <section class="card"><div class="card-h"><h2>通知</h2></div>${pushCard(false)}</section>
-    <section class="card"><div class="card-h"><h2>アカウント</h2></div>
+    ${pinUI.card(S, true)}<section class="card" hidden><div class="card-h"><h2>アカウント</h2></div>
       ${acc.anonymous ? `<p class="small mute" style="margin-top:0">いまはこの端末だけのアカウントです。メールを登録しておくと、機種変更しても記録を引き継げます。</p>
         <form class="row" id="linkF"><input name="email" type="email" placeholder="メールアドレス" required style="flex:1"><button class="btn sm">登録</button></form>`
         : `<p class="small" style="margin:0">登録メール：${esc(acc.email)}</p>`}</section>`;
@@ -992,7 +992,7 @@ async function boot() {
   $('#modeTag').textContent = S.store.mode === 'local' ? 'ローカルモード' : '';
   if (S.store.mode === 'supabase') {
     try { await navigator.serviceWorker.register('sw.js'); } catch {}
-    if (!S.store.team) return onboarding();
+    const pinCtx = { S, $, esc, toast, startApp, refreshPush, renderNow, isIOS, standalone }; if (!S.store.team) return pinUI.onboarding(pinCtx); pinUI.init(pinCtx);
     refreshPush();
   }
   startApp();
