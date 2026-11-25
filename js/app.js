@@ -1023,7 +1023,7 @@ function onboarding() {
   </div>`;
   const go = async (f, fn) => {
     const btn = f.querySelector('button'); btn.disabled = true;
-    try { await fn(new FormData(f)); document.body.classList.remove('onboard'); history.replaceState(null, '', location.pathname + '#home'); refreshPush(); startApp(); toast('チームに参加しました'); }
+    try { await fn(new FormData(f)); document.body.classList.remove('onboard'); window.history.replaceState(null, '', location.pathname + '#home'); refreshPush(); startApp(); toast('チームに参加しました'); }
     catch (e) { toast(e.message || String(e), true); btn.disabled = false; }
   };
   $('#joinF').onsubmit = e => { e.preventDefault(); go(e.target, f => S.store.joinTeam(String(f.get('code')), String(f.get('nick')))); };
