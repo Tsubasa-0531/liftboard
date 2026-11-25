@@ -93,7 +93,7 @@ document.addEventListener('focusout', () => setTimeout(() => {
 }, 50));
 
 function route() {
-  const t = (location.hash || '#home').slice(1);
+  const t = (location.hash || '#log').slice(1);
   S.tab = VIEWS[t] ? t : 'home';
   $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === S.tab));
   renderNow();
@@ -1023,7 +1023,7 @@ function onboarding() {
   </div>`;
   const go = async (f, fn) => {
     const btn = f.querySelector('button'); btn.disabled = true;
-    try { await fn(new FormData(f)); document.body.classList.remove('onboard'); window.history.replaceState(null, '', location.pathname + '#home'); refreshPush(); startApp(); toast('チームに参加しました'); }
+    try { await fn(new FormData(f)); document.body.classList.remove('onboard'); window.history.replaceState(null, '', location.pathname + '#log'); refreshPush(); startApp(); toast('チームに参加しました'); }
     catch (e) { toast(e.message || String(e), true); btn.disabled = false; }
   };
   $('#joinF').onsubmit = e => { e.preventDefault(); go(e.target, f => S.store.joinTeam(String(f.get('code')), String(f.get('nick')))); };
