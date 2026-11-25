@@ -3,7 +3,7 @@
   "short_name": "Lift Board",
   "description": "チームで共有する筋トレ記録",
   "lang": "ja",
-  "start_url": "./#home",
+  "start_url": "./#log",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0e0f11",
