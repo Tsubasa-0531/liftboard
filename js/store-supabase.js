@@ -18,17 +18,17 @@ export async function supabaseStore({ onError, onStatus }) {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
   });
   let { data: { session } } = await sb.auth.getSession();
-  if (!session) {
+  if (false) { // ログインは参加ボタンを押したときに行う（開いただけでは作らない）
     const { data, error } = await sb.auth.signInAnonymously();
     fail(error, 'サインインできませんでした');
     session = data.session;
   }
-  let user = session.user;
-  sb.auth.onAuthStateChange((_e, s) => { if (s && s.user.id !== user.id) location.reload(); else if (s) user = s.user; });
-  const uid = user.id;
+  let user = session ? session.user : null; async function ensureUser() { if (user) return; const { data, error } = await sb.auth.signInAnonymously(); fail(error, 'サインインできませんでした'); user = data.session.user; }
+  sb.auth.onAuthStateChange((_e, s) => { if (s && user && s.user.id !== user.id) location.reload(); else if (s) user = s.user; });
+  let uid = user ? user.id : null;
 
   let team = null;
-  async function loadTeam() {
+  async function loadTeam() { if (!uid) { team = null; return; }
     const { data, error } = await sb.from('members').select('team_id, teams(id, name, code)').eq('user_id', uid).maybeSingle();
     fail(error);
     team = data ? { id: data.team_id, name: data.teams?.name || '', code: data.teams?.code || '' } : null;
@@ -83,7 +83,7 @@ export async function supabaseStore({ onError, onStatus }) {
   }
 
   return {
-    mode: 'supabase', uid,
+    mode: 'supabase', get uid() { return uid; },
     get canWrite() { return !!team; },
     get team() { return team; },
     get account() { return { anonymous: !!user.is_anonymous, email: user.email || '' }; },
@@ -106,7 +106,7 @@ export async function supabaseStore({ onError, onStatus }) {
     profiles: async () => ({}),
 
     // チーム
-    async createTeam(name, nick, pin) { await rpcJson('create_team', { p_name: name, p_nick: nick, p_pin: pin }); await loadTeam(); }, async joinTeam(code, nick, pin) { const r = await rpcJson('join_team', { p_code: code, p_nick: nick, p_pin: pin }); await loadTeam(); return r; }, async hasPin() { const { data, error } = await sb.rpc('has_pin'); fail(error); return !!data; }, async setPin(pin) { const { error } = await sb.rpc('set_pin', { p_pin: pin }); fail(error, '暗証番号を保存できませんでした'); },
+    async createTeam(name, nick, pin) { await ensureUser(); uid = user.id; await rpcJson('create_team', { p_name: name, p_nick: nick, p_pin: pin }); await loadTeam(); }, async joinTeam(code, nick, pin) { await ensureUser(); uid = user.id; const r = await rpcJson('join_team', { p_code: code, p_nick: nick, p_pin: pin }); await loadTeam(); return r; }, async hasPin() { const { data, error } = await sb.rpc('has_pin'); fail(error); return !!data; }, async setPin(pin) { const { error } = await sb.rpc('set_pin', { p_pin: pin }); fail(error, '暗証番号を保存できませんでした'); },
     async joinTeamOld(code, nick) {
       const { error } = await sb.rpc('join_team', { p_code: code, p_nick: nick });
       if (error && /not found/.test(error.message)) throw new Error('チームコードが見つかりません');
