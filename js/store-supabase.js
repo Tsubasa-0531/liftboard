@@ -63,7 +63,7 @@ export async function supabaseStore({ onError, onStatus }) {
   // 画面に戻ったとき接続を張り直す（スマホのスリープ対策）
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sb.realtime.connect(); });
 
-  const writers = new Map();
+  const ERR = { team_not_found: 'チームコードが見つかりません', wrong_pin: 'その表示名はもう使われています。本人なら暗証番号が違います', locked: '暗証番号を5回まちがえたので、15分たってからもう一度', pin_format: '暗証番号は数字4桁で入れてください', nick_empty: '表示名を入れてください' }; async function rpcJson(fn, args) { const { data, error } = await sb.rpc(fn, args); fail(error, '通信できませんでした'); if (data && data.error) throw new Error(ERR[data.error] || data.error); return data; } const writers = new Map();
   const writer = (k, fn) => {
     if (!writers.has(k)) writers.set(k, makeWriter(async d => { const { error } = await fn(d); fail(error); }, onError));
     return writers.get(k);
@@ -106,8 +106,8 @@ export async function supabaseStore({ onError, onStatus }) {
     profiles: async () => ({}),
 
     // チーム
-    async createTeam(name, nick) { const { error } = await sb.rpc('create_team', { p_name: name, p_nick: nick }); fail(error, 'チームを作れませんでした'); await loadTeam(); },
-    async joinTeam(code, nick) {
+    async createTeam(name, nick, pin) { await rpcJson('create_team', { p_name: name, p_nick: nick, p_pin: pin }); await loadTeam(); }, async joinTeam(code, nick, pin) { const r = await rpcJson('join_team', { p_code: code, p_nick: nick, p_pin: pin }); await loadTeam(); return r; }, async hasPin() { const { data, error } = await sb.rpc('has_pin'); fail(error); return !!data; }, async setPin(pin) { const { error } = await sb.rpc('set_pin', { p_pin: pin }); fail(error, '暗証番号を保存できませんでした'); },
+    async joinTeamOld(code, nick) {
       const { error } = await sb.rpc('join_team', { p_code: code, p_nick: nick });
       if (error && /not found/.test(error.message)) throw new Error('チームコードが見つかりません');
       fail(error, '参加できませんでした'); await loadTeam();
