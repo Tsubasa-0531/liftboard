@@ -876,7 +876,7 @@ document.addEventListener('click', e => {
 });
 
 // ---------------------------------------------------- 独立アプリ版：チーム・通知・アカウント
-const inviteUrl = () => `${location.origin}${location.pathname}?team=${encodeURIComponent(S.store.team?.code || '')}`;
+const inviteUrl = () => `${location.origin}${location.pathname}?team=${encodeURIComponent(S.store.team?.code || '')}&openExternalBrowser=1`;
 const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 function pushCard(compact) {
